@@ -1,0 +1,3 @@
+poetry.lock
+.ipynb_checkpoints/
+data/raw/*

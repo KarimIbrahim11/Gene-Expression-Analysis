@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "src"
+version = "0.1.0"
+description = "Gene Expression Analysis"
+authors = ["Karim Wahba <karim.ibrahim.amin@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+pandas = "^2.0"
+
+
+[[tool.poetry.packages]]
+include = "utils"
+from = "src"
+
+[build-system]
+requires = ["poetry-core>=1.8.0"]
+build-backend = "poetry.core.masonry.api"
+
+
+[project]
+name = "Gene_Expression_Analysis"
+version = "0.1.0"
+description = "Effect size vs Sample Size for Gene Expression"
+authors = [{name = "Karim Wahba and Jenny Arndt", email = "karim.ibrahim.amin@gmail.com"}]
