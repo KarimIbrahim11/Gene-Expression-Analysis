@@ -41,7 +41,7 @@ Use the documentation for [Poetry installation](https://python-poetry.org/docs/1
 
 Clone the repo: 
 ```bash
-git clone URL
+git clone https://github.com/KarimIbrahim11/Gene-Expression-Analysis.git
 ```
 Then run the commands in order: 
 ```bash 
@@ -49,4 +49,7 @@ cd gene-expression-analysis
 poetry install
 poetry shell
 ```
-
+To run a `*.py` file: 
+```bash
+poetry run python <RELATIVE PATH OF THE PYTHON FILE>
+```
