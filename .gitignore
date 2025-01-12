@@ -2,3 +2,4 @@ poetry.lock
 .ipynb_checkpoints/
 data/raw/*
 data/processed/*
+playground.txt

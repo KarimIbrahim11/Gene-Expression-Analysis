@@ -1,0 +1,15 @@
+# Data paths
+data_paths:
+  raw_data: data/raw
+  processed_data: data/processed
+  genes: gene_expressions
+  analysis: data/analysis
+
+donors_ids:
+  - 9861
+  - 10021
+  - 12876
+  - 14380
+  - 15496
+  - 15697
+

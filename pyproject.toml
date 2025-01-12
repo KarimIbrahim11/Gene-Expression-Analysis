@@ -8,16 +8,24 @@ license = "MIT"
 [tool.poetry.dependencies]
 python = "^3.8"
 pandas = "^2.0"
-
+pyyaml = "^6.0.2"
+logging = "^0.4.9.6"
+pathlib = "^1.0.1"
+matplotlib = "3.4.3"
+scikit-learn = "0.24.2"
+seaborn = "0.11.1"
 
 [[tool.poetry.packages]]
 include = "utils"
 from = "src"
 
+[[tool.poetry.packages]]
+include = "configs"
+from = "src"
+
 [build-system]
 requires = ["poetry-core>=1.8.0"]
 build-backend = "poetry.core.masonry.api"
-
 
 [project]
 name = "Gene_Expression_Analysis"
