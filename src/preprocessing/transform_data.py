@@ -1,7 +1,6 @@
 import re
 import json
 import logging
-import numpy as np
 from pathlib import Path
 
 from utils.data import *
@@ -54,6 +53,23 @@ def write_df_to_json(df: pd.DataFrame) -> None:
 
     # Convert the dictionary to JSON
     json_output = json.dumps(restructured_data, indent=4)
+
+def transform_sample_annotations(donor_sa: pd.DataFrame, left_mask : pd.Series) -> pd.DataFrame:
+    # Keep certain columns in the SampleAnnot.csv file
+    donor_sa_processed = keep_df_cols(donor_sa, ["structure_id", "structure_name"])
+    deallocate_df(donor_sa)
+    # Applying mask on Sample annotations file
+    donor_sa_filtered= donor_sa_processed[left_mask].reset_index(drop=True)
+    deallocate_df(donor_sa_processed)
+    return donor_sa_filtered
+
+def transform_gene_expressions(donor_ge: pd.DataFrame, left_mask : pd.Series) -> pd.DataFrame:
+    # Applying mask on the Columns of the donor_ge file
+    left_mask_ge = pd.concat([pd.Series([True], index=[0]), left_mask], ignore_index=True)
+    left_mask_ge_filtered = left_mask_ge[left_mask_ge].index.values.tolist()
+    donor_ge_filtered  = donor_ge.iloc[:, left_mask_ge_filtered]
+    deallocate_df(donor_ge)
+    return donor_ge_filtered
         
 if __name__ == "__main__":
     
@@ -66,44 +82,41 @@ if __name__ == "__main__":
 
         # Processing SampleAnnot to get the brain region id ("structure id")
         donor_sa = load_df_from_csv(donor_path / "SampleAnnot.csv")
-
-        # Keep certain columns in the SampleAnnot.csv file
-        donor_sa_processed = keep_df_cols(donor_sa, ["structure_id"])
-
-        # Write processed file in processed directory and deallocate it
-        write_df_to_csv(donor_sa_processed, PROCESSED_DATA_PATH / f"sample_annotations/{get_donor_id_from_path(donor_path)}.csv")
-        deallocate_df(donor_sa)
-
-        # Adding gene_id column to the sample gene_expressions.csv
-        donor_ge = load_df_from_csv(donor_path / "MicroarrayExpression.csv")
-        donor_probes = load_df_from_csv(donor_path / "Probes.csv")
-
-        # Add Brain Region id as a column name in the gene_expression data
-        donor_ge.columns = ['probe_id'] + list(donor_sa_processed["structure_id"])
-
-        # Add gene_id Column in the gene_expressions data
-        donor_ge.insert(0, 'gene_id', donor_probes['gene_id'])
-
+        # Create a mask for left hemisphere entries
+        left_mask = mask_left_hemisphere(donor_sa)
+        # Transform donor_sa
+        donor_sa_filtered = transform_sample_annotations(donor_sa, left_mask)
         # Write processed file in processed directory
-        write_df_to_csv(donor_ge, PROCESSED_DATA_PATH / f"gene_expressions/{get_donor_id_from_path(donor_path)}.csv")
+        write_df_to_csv(donor_sa_filtered, PROCESSED_DATA_PATH / f"sample_annotations/{get_donor_id_from_path(donor_path)}.csv")
+
+        # Loading Gene Expressions
+        donor_ge = load_df_from_csv(donor_path / "MicroarrayExpression.csv")
+        # Transform Gene Expressions
+        donor_ge_filtered = transform_gene_expressions(donor_ge, left_mask)
+        # Load probes data 
+        donor_probes = load_df_from_csv(donor_path / "Probes.csv")
+        # Add Brain Region id as a column name in the gene_expression data
+        donor_ge_filtered.columns = ['probe_id'] + list(donor_sa_filtered["structure_id"])
+        deallocate_df(donor_sa_filtered)
+        # Add gene_id Column in the gene_expressions data
+        donor_ge_filtered.insert(0, 'gene_id', donor_probes['gene_id'])
+        # Write processed file in processed directory
+        write_df_to_csv(donor_ge_filtered, PROCESSED_DATA_PATH / f"gene_expressions/{get_donor_id_from_path(donor_path)}.csv")
 
         # Drop probe_id column        
-        donor_ge = donor_ge.drop(columns=['probe_id'])
-
+        donor_ge_filtered = donor_ge_filtered.drop(columns=['probe_id'])
         # Create a new CSV with grouped gene_ids by melting the DataFrame to make it easier to manipulate
-        df_melted = donor_ge.melt(id_vars=["gene_id"], var_name="brain_region", value_name="gene_expression_values")
-
+        df_melted = donor_ge_filtered.melt(id_vars=["gene_id"], var_name="brain_region", value_name="gene_expression_values")
         # Now, group by brain_region and gene_id  and aggregate the test values into lists
         df_grouped = df_melted.groupby(["brain_region", "gene_id"])["gene_expression_values"].apply(list).reset_index()
-
         # Save the grouped csvs per each donor
         write_df_to_csv(df_grouped, PROCESSED_DATA_PATH / f"brain_regions_genes_geneexpressions/{get_donor_id_from_path(donor_path)}_grouped.csv")
         deallocate_df(df_melted)
-        deallocate_df(donor_ge)
+        deallocate_df(donor_ge_filtered)
 
         # Create a new CSV with brain region and corresponding gene ids
         brain_region_samples = df_grouped.groupby("brain_region")["gene_id"].apply(list).reset_index()
-        write_df_to_csv(brain_region_samples, PROCESSED_DATA_PATH / f"brain_regions_genes/{get_donor_id_from_path(donor_path)}_samples.csv")
+        write_df_to_csv(brain_region_samples, PROCESSED_DATA_PATH / f"brain_region_samples/{get_donor_id_from_path(donor_path)}_samples.csv")
         deallocate_df(df_grouped)
         deallocate_df(brain_region_samples)
 

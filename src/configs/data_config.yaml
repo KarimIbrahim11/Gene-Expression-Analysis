@@ -3,7 +3,9 @@ data_paths:
   raw_data: data/raw
   processed_data: data/processed
   genes: gene_expressions
+  brain_regions_genes_ge: brain_regions_genes_geneexpressions
   analysis: data/analysis
+
 
 donors_ids:
   - 9861
