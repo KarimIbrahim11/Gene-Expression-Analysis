@@ -51,5 +51,23 @@ poetry shell
 ```
 To run a `*.py` file: 
 ```bash
+python <RELATIVE PATH OF THE PYTHON FILE>
+```
+or
+```bash
 poetry run python <RELATIVE PATH OF THE PYTHON FILE>
 ```
+
+### 3. Download Dataset
+
+To download the dataset simply run: 
+```bash
+poetry src/download_dataset.py
+```
+You should be seeing:
+```bash
+Downloading from URL: https://human.brain-map.org/api/v2/well_known_file_download/178238387
+normalized_microarray_donor9861.zip:   1%|▋                                                                                                 | 2.91M/426M [00:09<23:15, 303kB/s
+...
+```
+dataset will be downloaded in `data/raw`. 
