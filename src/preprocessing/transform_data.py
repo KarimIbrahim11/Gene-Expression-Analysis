@@ -27,33 +27,6 @@ parser.load()
 RAW_DATA_PATH = parser.get("data_paths", {}).get("raw_data") 
 PROCESSED_DATA_PATH = parser.get("data_paths", {}).get("processed_data")
 
-def write_df_to_json(df: pd.DataFrame) -> None:
-    # Create a dictionary to hold the restructured data
-    restructured_data = {}
-
-    # Iterate over the columns (brain regions)
-    for col in df.columns[1:]:  # Skip the first column which is gene_id
-        # Create a dictionary for each brain region
-        region_data = {}
-        
-        # Iterate through the rows for each gene_id
-        for idx, row in df.iterrows():
-            gene_id = row['gene_id']
-            test_value = row[col]
-            
-            # If the gene_id is not already in the dictionary, add it with an empty list
-            if gene_id not in region_data:
-                region_data[gene_id] = []
-            
-            # Append the test value to the gene_id entry
-            region_data[gene_id].append(test_value)
-        
-        # Add the region_data for the current brain region to the restructured_data dictionary
-        restructured_data[col] = region_data
-
-    # Convert the dictionary to JSON
-    json_output = json.dumps(restructured_data, indent=4)
-
 def transform_sample_annotations(donor_sa: pd.DataFrame, left_mask : pd.Series) -> pd.DataFrame:
     # Keep certain columns in the SampleAnnot.csv file
     donor_sa_processed = keep_df_cols(donor_sa, ["structure_id", "structure_name"])
@@ -109,6 +82,8 @@ if __name__ == "__main__":
         df_melted = donor_ge_filtered.melt(id_vars=["gene_id"], var_name="brain_region", value_name="gene_expression_values")
         # Now, group by brain_region and gene_id  and aggregate the test values into lists
         df_grouped = df_melted.groupby(["brain_region", "gene_id"])["gene_expression_values"].apply(list).reset_index()
+        # apply json dumps to be able to load the file appropiately
+        df_grouped["gene_expression_values"] = df_grouped["gene_expression_values"].apply(json.dumps)
         # Save the grouped csvs per each donor
         write_df_to_csv(df_grouped, PROCESSED_DATA_PATH / f"brain_regions_genes_geneexpressions/{get_donor_id_from_path(donor_path)}_grouped.csv")
         deallocate_df(df_melted)
