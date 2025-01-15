@@ -20,7 +20,7 @@ sh.setLevel(logging.INFO)
 # Add the handler to the logger
 logger.addHandler(sh)
 
-# Raw data directory path has directories of the donors in the form normalized_microarray_donorxxxxx /
+# Configs Directory
 configs_dir = "src/configs/"
 
 parser = PathConfigParser(configs_dir + "data_config.yaml")
