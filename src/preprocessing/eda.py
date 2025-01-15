@@ -1,14 +1,14 @@
 import logging
-
-import seaborn as sns
-import matplotlib.pyplot as plt
-from sklearn.decomposition import PCA
-from mpl_toolkits.mplot3d import Axes3D
+import ijson
+import numpy as np
+from decimal import Decimal
+from pathlib import Path
+from typing import List, Tuple
 
 from utils.data import *
+from utils.plots import *
+from utils.memory_management import *
 from configs.config_parser import PathConfigParser
-
-
 
 # Set up logger
 logger = logging.getLogger(__name__)
@@ -17,80 +17,76 @@ logger.setLevel(logging.INFO)
 # Create a console handler
 sh = logging.StreamHandler()
 sh.setLevel(logging.INFO)
-
 # Add the handler to the logger
 logger.addHandler(sh)
 
+# Raw data directory path has directories of the donors in the form normalized_microarray_donorxxxxx /
 configs_dir = "src/configs/"
 
 parser = PathConfigParser(configs_dir + "data_config.yaml")
 parser.load()
 
-# Access paths
 PROCESSED_DATA_PATH = parser.get("data_paths", {}).get("processed_data")
-GE_PATH = parser.get("data_paths", {}).get("genes")
-PROCESSED_DONORS_GE_PATH = PROCESSED_DATA_PATH / GE_PATH 
+GE_PATH = parser.get("data_paths", {}).get("brain_regions_genes_ge")
+PROCESSED_DONORS_GE_PATH = PROCESSED_DATA_PATH / GE_PATH
 
 # Donors_ids
 DONORS_IDS = parser.get("donors_ids")
 
-def save_correlation_heat_map(df: pd.DataFrame, path: Path, title: str) ->  None:
+def get_meta_donor_lists(pth: Path) -> Tuple[List[str], List[int], List[int], int]:
     """
-    Save Correlation Heat Map from df
+        Export Brain Regions, Gene_Ids and Brain Samples Per Region Lists for plotting. 
     """
-    # Correlation heatmap
-    plt.figure(figsize=(10, 8))
-    sns.heatmap(df.corr(), annot=False, cmap='coolwarm')
-    plt.title(title)
-    plt.savefig(path, dpi=300, bbox_inches='tight')
-    plt.show()
-    plt.close()
+    # Lists to store information for plotting
+    brain_regions = []
+    gene_ids = []
+    samples_sizes_per_brain_region = []
+    gene_lengths = []
+    total_number_of_samples = 0
+
+    # Stream through the JSON file using ijson
+    with open(pth, "r") as f:
+        # Parse key-value pairs at the root level
+        for brain_region, genes in ijson.kvitems(f, ''):
+            logger.info(f"Brain Region: {brain_region}")  # Access the brain region key (e.g., "4012")
+            number_of_samples_per_brain_region = 0
+            for gene in genes:
+                # Access gene_id
+                gene_id = gene["gene_id"]
+                gene_ids.append(gene_id)
+                
+                # Access gene_expression_values and convert to float if Decimal
+                gene_expression_values = [float(val) if isinstance(val, Decimal) else val for val in gene["gene_expression_values"]]
+                gene_lengths.append(len(gene_expression_values))
+                number_of_samples_per_brain_region+=len(gene_expression_values)
+
+                # Calculate the total number of sample sizes
+                total_number_of_samples+= len(gene_expression_values)
+
+                # Print or process the values
+                # logger.info(f"  Gene ID: {gene_id}")
+                # logger.info(f"  Gene Expression Values (length {len(gene_expression_values)}): {gene_expression_values}...")  # Print first 5 values
+
+            samples_sizes_per_brain_region.append(number_of_samples_per_brain_region)
+            brain_regions.append(brain_region)
+    
+    return brain_regions, gene_ids, samples_sizes_per_brain_region, total_number_of_samples       
 
 
+if __name__=="__main__":
+    # Path of the meta_donor data
+    brain_regions, brain_regions_gene_ids, samples_sizes_per_brain_region, total_number_of_samples= get_meta_donor_lists(PROCESSED_DONORS_GE_PATH / Path("meta_donor.json"))
 
-if __name__ == "__main__":
-    for donor_ge_path in PROCESSED_DONORS_GE_PATH.iterdir():
-        # Check if the file is a file (not a directory) and if its name matches any ID in the list
-        if donor_ge_path.is_file() and int(donor_ge_path.stem) in DONORS_IDS:
-            donor_ge = load_df_from_csv(donor_ge_path)
-            donor_id = donor_ge_path.stem
+    gene_ids = list(set(brain_regions_gene_ids))
 
-            # Saving Brain Region Correlation Maps
-            brain_correlation_pth = parser.get("data_paths", {}).get("analysis")/ Path("Brain Region Correlation")
-            brain_correlation_pth.mkdir(parents=True, exist_ok=True)
-            save_correlation_heat_map(donor_ge.iloc[:, 2:], brain_correlation_pth / Path(donor_id),
-                                      f"Brain Region Correlation heatmap of {donor_id}")
-            
-            # # Distribution for a single brain region
-            # plt.hist(donor_ge['4215'], bins=30, color='blue', edgecolor='black')
+    logger.info("Number of Total Brain Regions: ", len(brain_regions))
+    logger.info("Number of Sample Sizes Calculated", len(samples_sizes_per_brain_region))
+    logger.info("Number of Gene Ids", len(gene_ids))
+    logger.info("Total Samples across all Brain Regions \n", total_number_of_samples)
+    
+    # Plots
+    plot_values(brain_regions, samples_sizes_per_brain_region, "Number of Samples Per Brain Regions", 
+                    "Brain Regions", "Number of Samples", True)
 
-            # # Add labels and title
-            # plt.xlabel('Values')
-            # plt.ylabel('Gene Expression Values')
-            # plt.title("Distribution of Region 4215")
-            # plt.show()
-
-            # # PCA for dimensionality reduction
-            # brain_region_data = donor_ge.iloc[:, 2:].values
-            # pca = PCA(n_components=3)
-            # pca_result = pca.fit_transform(brain_region_data)
-            # donor_ge['PCA1'] = pca_result[:, 0]
-            # donor_ge['PCA2'] = pca_result[:, 1]
-            # donor_ge['PCA3'] = pca_result[:, 2]
-
-            # # Create a 3D plot
-            # fig = plt.figure(figsize=(8, 6))
-            # ax = fig.add_subplot(111, projection='3d')
-
-            # # Scatter plot
-            # sc = ax.scatter(donor_ge['PCA1'], donor_ge['PCA2'], donor_ge['PCA3'], c='b', marker='o')
-
-            # # Add labels
-            # ax.set_xlabel('PCA1')
-            # ax.set_ylabel('PCA2')
-            # ax.set_zlabel('PCA3')
-            # ax.set_title('PCA of Brain Region Data')
-
-            # plt.show()
-            
-            # break
+    plot_histogram(samples_sizes_per_brain_region, plot_title="Sample Size per Brain Region Histogram-20", 
+                   x_title="Sample Size Per Brain Region", y_title="Number of Brain Regions (Frequence)", bins=20, save=True)      
