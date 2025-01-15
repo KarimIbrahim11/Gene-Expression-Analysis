@@ -1,6 +1,5 @@
-import re
 import pandas as pd
-from typing import List, Tuple
+from typing import List
 from pathlib import Path
 
 
