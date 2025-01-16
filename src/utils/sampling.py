@@ -1,0 +1,92 @@
+import logging
+import ijson
+import numpy as np
+from decimal import Decimal
+from pathlib import Path
+from typing import List, Tuple
+
+from src.utils.data import *
+from src.utils.plots import *
+from src.utils.memory_management import *
+from src.configs.config_parser import PathConfigParser, data_config_file
+
+# Configs Directory
+parser = PathConfigParser(str(data_config_file))
+parser.load()
+
+# Set up logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# Create a console handler
+sh = logging.StreamHandler()
+sh.setLevel(logging.INFO)
+# Add the handler to the logger
+logger.addHandler(sh)
+
+
+PROCESSED_DATA_PATH = parser.get("data_paths", {}).get("processed_data")
+GE_PATH = parser.get("data_paths", {}).get("brain_regions_genes_ge")
+PROCESSED_DONORS_GE_PATH = PROCESSED_DATA_PATH / GE_PATH
+
+# Donors_ids
+DONORS_IDS = parser.get("donors_ids")
+
+# Counts
+def get_total_number_of_samples(df: pd.DataFrame) -> int:
+    """
+        Get the total number of Samples available
+    """
+    return df['gene_expression_values'].apply(len).sum()
+
+def get_total_number_of_br(df: pd.DataFrame) -> int:
+    """
+        Get the total number of Brain Regions
+    """
+    return df["brain_region"].nunique()
+
+def get_number_of_genes_per_br(df: pd.DataFrame) -> List[int]:
+    """
+        Get the number of Genes per Brain Region
+    """
+    # Count the number of gene_ids per brain region
+    return df.groupby("brain_region")["gene_id"].count()
+
+def get_number_of_samples_per_br(df: pd.DataFrame) -> List[int]:
+    """
+        Get the number of Samples per Brain Region.
+    """
+    df['num_gene_expression_values'] = df['gene_expression_values'].apply(len)
+
+    # Group by 'brain_region' and sum the 'num_gene_expression_values' for each region
+    result = df.groupby('brain_region')['num_gene_expression_values'].sum()
+
+    # Drop the 'num_gene_expression_values' column if you no longer need it
+    df = df.drop(columns=['num_gene_expression_values'])
+
+    # Convert the result to a list
+    return result.tolist()
+
+def get_number_of_samples_per_br_ge(df:  pd.DataFrame) ->  List[int]:
+    """
+        Get the number of Samples per Brain Region-Gene Id pair.
+    """
+    # Count the number of samples for each brain_region-gene_id pair
+    df["sample_count"] = df["gene_expression_values"].apply(len)
+    return df[["brain_region", "gene_id", "sample_count"]]
+
+
+# Lists of brain regions
+def get_br_list(df: pd.DataFrame) -> List[str]:
+    """
+        Get a list of brain regions available.
+    """
+    return df["brain_region"].unique().tolist()
+
+# Sampling per brain-region-gene-id pair
+def get_br_ge_sample(df: pd.DataFrame, br: int, ge: int) -> List[int]:
+    """
+        Get the Samples of a Brain Region-Gene Id pair
+    """
+    return df[(df['brain_region'] == br) & (df['gene_id'] == ge)]["gene_expression_values"][0]
+

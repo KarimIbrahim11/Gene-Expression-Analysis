@@ -3,9 +3,9 @@ import json
 import logging
 from pathlib import Path
 
-from utils.data import *
-from utils.memory_management import *
-from configs.config_parser import PathConfigParser
+from src.utils.data import *
+from src.utils.memory_management import *
+from src.configs.config_parser import PathConfigParser, data_config_file
 
 # Set up logger
 logger = logging.getLogger(__name__)
@@ -17,10 +17,8 @@ sh.setLevel(logging.INFO)
 # Add the handler to the logger
 logger.addHandler(sh)
 
-# Raw data directory path has directories of the donors in the form normalized_microarray_donorxxxxx /
-configs_dir = "src/configs/"
-
-parser = PathConfigParser(configs_dir + "data_config.yaml")
+# Configs Directory
+parser = PathConfigParser(str(data_config_file))
 parser.load()
 
 # Access paths

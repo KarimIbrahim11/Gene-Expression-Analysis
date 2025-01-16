@@ -3,9 +3,9 @@ from ast import literal_eval
 import logging
 from pathlib import Path
 
-from utils.data import *
-from utils.memory_management import *
-from configs.config_parser import PathConfigParser
+from src.utils.data import *
+from src.utils.memory_management import *
+from src.configs.config_parser import PathConfigParser, data_config_file
 
 # Set up logger
 logger = logging.getLogger(__name__)
@@ -19,10 +19,7 @@ sh.setLevel(logging.INFO)
 logger.addHandler(sh)
 
 # Configs Directory
-configs_dir = "src/configs/"
-
-# Configuration Parser Loading
-parser = PathConfigParser(configs_dir + "data_config.yaml")
+parser = PathConfigParser(str(data_config_file))
 parser.load()
 
 # Access paths 

@@ -1,6 +1,13 @@
 import yaml
 from pathlib import Path
 
+# Get the project root directory (works both in notebooks and Python scripts)
+project_root = Path(__file__).resolve().parent.parent.parent  # Going two levels up from config.py
+configs_dir = project_root / "src" / "configs"
+
+# Config file path
+data_config_file = configs_dir / "data_config.yaml"
+
 class PathConfigParser:
     def __init__(self, file_path):
         self.file_path = Path(file_path)

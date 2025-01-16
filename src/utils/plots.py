@@ -5,16 +5,14 @@ from matplotlib import ticker
 from typing import List
 from pathlib import Path
 
-from configs.config_parser import PathConfigParser
+from src.configs.config_parser import PathConfigParser, data_config_file, project_root
 
-# Configs Dir
-configs_dir = "src/configs/"
-
-parser = PathConfigParser(configs_dir + "data_config.yaml")
+# Configs Directory
+parser = PathConfigParser(str(data_config_file))
 parser.load()
 
 # Path of Plots 
-PLOTS_PTH = parser.get("data_paths", {}).get("plots")
+PLOTS_PTH = project_root / parser.get("data_paths", {}).get("plots")
 
 def plot_values(x: List[int], y: List[int], plot_title: str= "Values per Label", x_title: str="Labels", y_title: str="Values", save: bool = False)-> None:
     """
@@ -34,15 +32,15 @@ def plot_values(x: List[int], y: List[int], plot_title: str= "Values per Label",
     ax.yaxis.set_major_formatter(formatter)
     ax.ticklabel_format(style='plain')
 
-    x_ticks_interval = 10  # Show every 10th tick
-    ax.set_xticks(np.arange(0, len(x), x_ticks_interval))  # Set positions for x ticks
-    ax.set_xticklabels(x[::x_ticks_interval], rotation=45, ha='right')  # Display every 10th label with rotation
+    # x_ticks_interval = 10  # Show every 10th tick
+    # ax.set_xticks(np.arange(0, len(x), x_ticks_interval))  # Set positions for x ticks
+    # ax.set_xticklabels(x[::x_ticks_interval], rotation=45, ha='right')  # Display every 10th label with rotation
 
     # Labeling
     ax.set_xlabel(x_title)
     ax.set_ylabel(y_title)
     ax.set_title(plot_title)
-    ax.tick_params(axis='x', rotation=90)
+    # ax.tick_params(axis='x', rotation=90)
     ax.grid(True)
 
     # Save if necessary

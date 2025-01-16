@@ -7,7 +7,8 @@ from pathlib import Path
 from typing import List
 from urllib.parse import urlparse
 
-from configs.config_parser import PathConfigParser
+from src.configs.config_parser import PathConfigParser, data_config_file, project_root
+
 
 # Set up logger
 logger = logging.getLogger(__name__)
@@ -74,7 +75,7 @@ def unzip_file(zip_path: Path, extract_to: Path) -> None:
         logger.info(f"Error unzipping {zip_path}: {e}")
 
 
-def get_dataset(dataset_urls: List[str], dataset_path: Path = Path("data/raw")) -> None:
+def get_dataset(dataset_urls: List[str], dataset_path: Path = project_root / Path("data/raw")) -> None:
     """
         Downloads dataset from the list of dataset_urls given.
     """
@@ -97,11 +98,8 @@ def get_dataset(dataset_urls: List[str], dataset_path: Path = Path("data/raw")) 
 
 
 def main():
-    # Configs Directory
-    configs_dir = "src/configs/"
-
-    # Load the ConfigParser object
-    parser = PathConfigParser(configs_dir + "data_config.yaml")
+# Configs Directory
+    parser = PathConfigParser(str(data_config_file))
     parser.load()
 
     # List of Data URLs:
