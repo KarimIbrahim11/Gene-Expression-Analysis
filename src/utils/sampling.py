@@ -76,12 +76,19 @@ def get_number_of_samples_per_br_ge(df:  pd.DataFrame) ->  List[int]:
     return df[["brain_region", "gene_id", "sample_count"]]
 
 
-# Lists of brain regions
+# Basic Getters
 def get_br_list(df: pd.DataFrame) -> List[str]:
     """
         Get a list of brain regions available.
     """
     return df["brain_region"].unique().tolist()
+
+def get_ge_list(df:pd.DataFrame) -> List[int]:
+    """
+        Get a list of Gene Ids available.
+    """
+    return df["gene_id"].unique().tolist()
+
 
 # Sampling per brain-region-gene-id pair
 def get_br_ge_sample(df: pd.DataFrame, br: int, ge: int) -> List[int]:
