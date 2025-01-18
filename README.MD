@@ -48,7 +48,17 @@ Then run the commands in order:
 cd gene-expression-analysis
 poetry install
 poetry shell
+
 ```
+To run `*.ipynb` notebooks simple open jupyter on browser by the following command:
+```bash
+python -m notebook
+```
+or if that didn't work as expected:  
+```bash
+poetry run python -m notebook
+```
+
 To run a `*.py` file: 
 ```bash
 python <RELATIVE PATH OF THE PYTHON FILE>
@@ -57,12 +67,15 @@ or
 ```bash
 poetry run python <RELATIVE PATH OF THE PYTHON FILE>
 ```
+> Note: In most cases, it will be easier to run the notebooks in the `notebooks/` directory.
 
-### 3. Download Dataset
+### 3. Downloading Dataset, Transforming and Preprocessing
 
-To download the dataset simply run: 
+Downloading Dataset, Transformation and Preprocessing can be done all at once through the `notebooks/CS_00_Data_Transformation.ipynb` notebook. 
+
+To download dataset only, simply run:
 ```bash
-poetry src/download_dataset.py
+poetry run python data/download_dataset.py
 ```
 You should be seeing:
 ```bash
@@ -71,3 +84,12 @@ normalized_microarray_donor9861.zip:   1%|▋                                   
 ...
 ```
 dataset will be downloaded in `data/raw`. 
+
+To tranform, clean and preprocess data run: 
+```bash
+poetry run python src/preprocessing/transform_data.py
+poetry run python src/preprocessing/transform_data_json.py
+poetry run python src/preprocessing/create_meta_donor_csv.py
+```
+
+Processed data will be in `data/processed`.

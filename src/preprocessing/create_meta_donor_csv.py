@@ -27,12 +27,13 @@ PROCESSED_DONORS_GE_PATH = PROCESSED_DATA_PATH / GE_PATH
 # Donors_ids
 DONORS_IDS = parser.get("donors_ids")
 
-if __name__ == "__main__":
+def main():
     donor_ges = []
+
+    # Loading previously transformed files and creating the meta_donor.csv file
     for donor in DONORS_IDS:
-        # Load donor csv from processed data 
+        # Load donor .csv from processed data 
         donor_ge = load_df_from_csv(PROCESSED_DONORS_GE_PATH / Path(f"{donor}_grouped.csv"))
-        # logger.info(donor_ge.describe())
         logger.info(f"Donor Id: {str(donor)}")
         logger.info(f"Number of brain regions: {donor_ge['brain_region'].nunique()}")
         logger.info(f"Number of gene ids: {donor_ge['gene_id'].nunique()}")
@@ -40,35 +41,22 @@ if __name__ == "__main__":
         donor_ges.append(donor_ge)
         deallocate_df(donor_ge)
 
-    # Finding common brain regions and filtering them out
+    # Finding common brain regions and filtering the others out
     common_brain_regions = set.intersection(*(set(donor_ge['brain_region']) for donor_ge in donor_ges))
+    logger.info(f"Number of common brain regions: {len(common_brain_regions)}")
 
-    print("Number of common brain regions", len(common_brain_regions))
+    # Keep only the common columns in each DataFrame
+    filtered_donors_ges = [donor_ge[donor_ge['brain_region'].isin(common_brain_regions)] for donor_ge in donor_ges]
+    set(filtered_donors_ges[3]['brain_region'])==common_brain_regions
 
-    meta_donor_df = pd.concat(donor_ges, ignore_index=True)
-
-    # print("Types: ", meta_donor_df["gene_expression_values"].apply(type).unique())
-
-    # meta_donor_df["gene_expression_values"] = meta_donor_df["gene_expression_values"].apply(
-    # lambda x: x if isinstance(x, list) else [x])
-
-    # print("Types: ", meta_donor_df["gene_expression_values"].apply(type).unique())
-
-    print(meta_donor_df.head(5))
+    # Concatenate all filtered DataFrames
+    meta_donor_df = pd.concat(filtered_donors_ges, ignore_index=True)
+    logger.info(f"meta_donor_df size:{len(meta_donor_df)}")
+    logger.info(f"Meta Donor DF has only list of common_brain_regions: {set(meta_donor_df['brain_region'])==common_brain_regions}")
 
     concatenated_ges = meta_donor_df.groupby(["brain_region", "gene_id"])["gene_expression_values"].apply(lambda x: sum(x, [])).reset_index()
 
     write_df_to_csv(concatenated_ges, PROCESSED_DONORS_GE_PATH / f"meta_donor.csv")
 
-
-    # print("Common Brain Regions", common_brain_regions)
-
-    # # Keep only the common columns in each DataFrame
-    # filtered_ges = [donor_ge[list(common_brain_regions)] for donor_ge in donor_ges]
-
-    # # Concatenate all filtered DataFrames
-    # concatenated_ges = pd.concat(filtered_ges, ignore_index=True)
-        
-    # # Write processed file in processed directory
-    # write_df_to_csv(concatenated_ges, PROCESSED_DATA_PATH / f"gene_expressions/combined.csv")      
-
+if __name__ == "__main__":
+    main()
