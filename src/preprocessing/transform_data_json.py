@@ -51,7 +51,8 @@ def write_geneexpressions_to_json(df: pd.DataFrame, pth: Path) -> None:
     with open(pth, "w") as f:
         json.dump(grouped, f, indent=4)
 
-if __name__== "__main__":
+
+def main():
     # Creating Json files for Hierarchal Data
     for donor in DONORS_IDS:
         logger.info(f"Creating donor id: {str(donor)} json file")
@@ -62,3 +63,7 @@ if __name__== "__main__":
     logger.info(f"Creating meta_donor.json file")
     meta_donor_ge = load_df_from_csv(PROCESSED_DONORS_GE_PATH / Path(f"meta_donor.csv"))
     write_geneexpressions_to_json(meta_donor_ge, PROCESSED_DONORS_GE_PATH / Path(f"meta_donor.json"))
+
+    
+if __name__== "__main__":
+    main()
