@@ -95,7 +95,7 @@ def get_br_ge_sample(df: pd.DataFrame, br: int, ge: int) -> List[int]:
     """
         Get the Samples of a Brain Region-Gene Id pair
     """
-    return df[(df['brain_region'] == br) & (df['gene_id'] == ge)]["gene_expression_values"][0]
+    return df[(df['brain_region'] == br) & (df['gene_id'] == ge)]["gene_expression_values"].to_list()[0]
 
 
 # Getting the BR-Region IDs pairs with different sample sizes
