@@ -63,4 +63,10 @@ def mask_left_hemisphere(sample_annotations: pd.DataFrame) -> pd.Series:
     # Check for rows in sample_annotations where the entries in 'structure_name' contain the word 'left'
     return sample_annotations['structure_name'].str.contains(r'\bleft\b', case=False, na=False)
 
-   
+
+# Masking only brain_region gene_id pairs that have more than a certain threshold of samples
+def mask_samples_threshold(df: pd.DataFrame, threshold: int) -> pd.DataFrame:
+    """
+        Filtering out Brain-Region Gene-Id Pairs that have samples fewer than a threshold
+    """
+    return df[df['gene_expression_values'].apply(len) >= threshold]

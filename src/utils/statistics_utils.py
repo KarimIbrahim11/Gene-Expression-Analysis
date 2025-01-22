@@ -55,3 +55,5 @@ def calculate_gene_mean_expression_values(df: pd.DataFrame) -> pd.DataFrame:
 
     # Return the result
     return grouped
+
+ 

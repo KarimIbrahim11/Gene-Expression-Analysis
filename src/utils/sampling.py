@@ -99,13 +99,30 @@ def get_br_ge_sample(df: pd.DataFrame, br: int, ge: int) -> List[int]:
 
 
 # Getting the BR-Region IDs pairs with different sample sizes
-def get_br_ge_count_above_sample_size(df:pd.DataFrame, start_threshold: int = 10, end_threshold: int = 110, steps:int = 10) -> List[int]:
+def get_br_ge_count_above_sample_size(df:pd.DataFrame, range: List[int]) -> List[int]:
     """
         Get the count of a Brain Region pair with a samples more than certain thresholds
     """
     count_per_sample_size = []
-    for threshold in range(start_threshold, end_threshold, steps):  # Thresholds from 10 to 100 in steps of 10
-        count_per_sample_size.append( df[df["sample_count"] > threshold].shape[0])
+    for threshold in range:  # Thresholds from 10 to 100 in steps of 10
+        count_per_sample_size.append( df[df["sample_count"] >= threshold].shape[0])
     
     return count_per_sample_size
 
+
+# Calculate the standard deviation for each gene_id without exploding the list
+def std_gene_id_optimized(df: pd.DataFrame) -> pd.DataFrame:
+    """
+        Get the STD of each Gene ID
+    """
+    def calculate_std(gene_expression_list):
+        return pd.Series(gene_expression_list).std()
+
+    # Apply the std calculation to the gene expression values for each group of gene_id
+    def group_std(x):
+        return calculate_std([item for sublist in x for item in sublist])  # Flatten the list of lists
+    
+    # Group by gene_id and apply the function
+    std_per_gene = df.groupby('gene_id')['gene_expression_values'].apply(group_std).reset_index(name='std')
+    
+    return std_per_gene

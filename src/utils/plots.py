@@ -98,3 +98,34 @@ def plot_histogram(values: List[int], plot_title: str= "Values per Label", x_tit
     fig.tight_layout()
     plt.show()
     plt.close()
+
+
+
+def plot_scatter_log(x: List[int], y: List[int], plot_title: str= "Values per Label", x_title: str="Labels", 
+                     y_title: str="Values", label: str = "(X,Y)", save: bool = False)-> None:
+    """
+        A generic function for a scatter plot of the values
+    """
+    
+    # Create a scatter plot
+    plt.figure(figsize=(10, 6))
+    plt.scatter(x, np.log(y), color='blue', 
+                label=label)
+
+    # Annotate each point with its original value
+    for x, y in zip(x, np.log(y)):
+        plt.text(x, y, f'({x}, {round(np.exp(y))})', fontsize=9, ha='right', color='darkred')
+
+    # Add labels, title, and legend
+    plt.xlabel(x_title)
+    plt.ylabel(y_title)
+    plt.title(plot_title)
+    plt.legend()
+    plt.grid(True)
+    
+    # Save the plot as a PNG file
+    if save: 
+        plt.savefig(plot_title, dpi=300, bbox_inches='tight')
+
+    # Display the plot
+    plt.show()
