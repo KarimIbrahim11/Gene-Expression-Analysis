@@ -62,7 +62,7 @@ def get_number_of_samples_per_br(df: pd.DataFrame) -> List[int]:
     result = df.groupby('brain_region')['num_gene_expression_values'].sum()
 
     # Drop the 'num_gene_expression_values' column if you no longer need it
-    df = df.drop(columns=['num_gene_expression_values'])
+    df.drop(columns=['num_gene_expression_values'])
 
     # Convert the result to a list
     return result.tolist()
@@ -96,4 +96,16 @@ def get_br_ge_sample(df: pd.DataFrame, br: int, ge: int) -> List[int]:
         Get the Samples of a Brain Region-Gene Id pair
     """
     return df[(df['brain_region'] == br) & (df['gene_id'] == ge)]["gene_expression_values"][0]
+
+
+# Getting the BR-Region IDs pairs with different sample sizes
+def get_br_ge_count_above_sample_size(df:pd.DataFrame, start_threshold: int = 10, end_threshold: int = 110, steps:int = 10) -> List[int]:
+    """
+        Get the count of a Brain Region pair with a samples more than certain thresholds
+    """
+    count_per_sample_size = []
+    for threshold in range(start_threshold, end_threshold, steps):  # Thresholds from 10 to 100 in steps of 10
+        count_per_sample_size.append( df[df["sample_count"] > threshold].shape[0])
+    
+    return count_per_sample_size
 

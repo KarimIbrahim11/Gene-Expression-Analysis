@@ -13,6 +13,7 @@ parser.load()
 
 # Path of Plots 
 PLOTS_PTH = project_root / parser.get("data_paths", {}).get("plots")
+PLOTS_PTH.mkdir(parents=True, exist_ok=True)
 
 def plot_values(x: List[int], y: List[int], plot_title: str= "Values per Label", x_title: str="Labels", y_title: str="Values", save: bool = False)-> None:
     """
