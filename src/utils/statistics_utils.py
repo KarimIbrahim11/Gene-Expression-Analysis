@@ -56,4 +56,35 @@ def calculate_gene_mean_expression_values(df: pd.DataFrame) -> pd.DataFrame:
     # Return the result
     return grouped
 
- 
+# Calculate the standard deviation for each gene_id without exploding the list
+def calculate_std_gene_id_optimized(df: pd.DataFrame) -> pd.DataFrame:
+    """
+        Get the STD of each Gene ID
+    """
+    def calculate_std(gene_expression_list):
+        return pd.Series(gene_expression_list).std()
+
+    # Apply the std calculation to the gene expression values for each group of gene_id
+    def group_std(x):
+        return calculate_std([item for sublist in x for item in sublist])  # Flatten the list of lists
+    
+    # Group by gene_id and apply the function
+    std_per_gene = df.groupby('gene_id')['gene_expression_values'].apply(group_std).reset_index(name='std')
+    
+    return std_per_gene
+
+# Calculate Cohen's D Effect Size
+def calculate_cohen_d(sample_mean: float, control_group_mean: float, 
+                      sample_std: float, control_group_std: float,
+                      sample_length: int, control_group_length: int):
+    """
+        Function to calculate the effect size using Cohen's D Equation
+    """   
+    # Calculate the pooled standard deviation
+    pooled_sd = np.sqrt(((sample_length - 1) * sample_std**2 + (control_group_length - 1) * control_group_std**2) 
+                        / (sample_length + control_group_length - 2))
+    
+    # Calculate Cohen's d
+    d = (sample_mean - control_group_mean) / pooled_sd
+
+    return d
