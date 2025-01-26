@@ -4,6 +4,8 @@ import numpy as np
 from decimal import Decimal
 from pathlib import Path
 from typing import List, Tuple
+from scipy.stats import t
+from statsmodels.stats.power import TTestPower
 
 from src.utils.data import *
 from src.utils.plots import *
@@ -88,3 +90,53 @@ def calculate_cohen_d(sample_mean: float, control_group_mean: float,
     d = (sample_mean - control_group_mean) / pooled_sd
 
     return d
+
+
+# Calculate the Sample T statistic
+def calculate_t_statistic(sample_mean: float, sample_std: float, 
+                                 sample_size: int, population_mean: float) -> float:
+    """
+        Function to calculate the t statistic of a sample
+    """   
+    # Calculate the T-statistic
+    t_stat = (sample_mean - population_mean) / (sample_std / (sample_size ** 0.5))
+    
+    return t_stat 
+
+
+# Calculate P-value using Bootstraping
+def calculate_bootstrap_p_value(sample: List[float], t_statistic: float, B: int,
+                                population_mean: float) -> Tuple[float, List[float]]:
+    """
+        Function to calculate p-value from B bootstraped samples
+    """   
+    n = len(sample)
+    t = np.zeros(B)
+    boostraped_samples =[]
+    
+    # Resample the data B times
+    np.random.seed(42)
+    for b in range(B):
+        x_b = np.random.choice(sample, n, replace=True)
+        boostraped_samples.extend(x_b)
+        t[b] = calculate_t_statistic(np.mean(x_b), np.std(x_b), len(x_b), population_mean)
+
+    # Compute the p-value
+    p_value = np.mean(t > t_statistic, dtype=float)
+    
+    return p_value, boostraped_samples
+ 
+ 
+ # Calculate the test Power
+def calculate_test_power(effect_size: float, sample_mean: float, population_mean: float, 
+                          sample_std: float, sample_size: int, alpha: float = 0.05) ->  float:
+    """
+        Function to calculate power for a test
+    """   
+    # Initialize TTestPower object
+    power_analysis = TTestPower()
+
+    # Calculate power
+    power = power_analysis.solve_power(effect_size=effect_size, nobs=sample_size, alpha=alpha, alternative='larger')
+    
+    return power
