@@ -58,6 +58,7 @@ def calculate_gene_mean_expression_values(df: pd.DataFrame) -> pd.DataFrame:
     # Return the result
     return grouped
 
+
 # Calculate the standard deviation for each gene_id without exploding the list
 def calculate_std_gene_id_optimized(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -76,7 +77,7 @@ def calculate_std_gene_id_optimized(df: pd.DataFrame) -> pd.DataFrame:
     return std_per_gene
 
 # Calculate Cohen's D Effect Size
-def calculate_cohen_d(sample_mean: float, control_group_mean: float, 
+def calculate_cohen_d_pooled(sample_mean: float, control_group_mean: float, 
                       sample_std: float, control_group_std: float,
                       sample_length: int, control_group_length: int):
     """
@@ -92,14 +93,29 @@ def calculate_cohen_d(sample_mean: float, control_group_mean: float,
     return d
 
 
+# Calculate Cohen's D Effect Size
+def calculate_cohen_d(sample_mean: float, control_group_mean: float, 
+                      sample_std: float, control_group_std: float,
+                      sample_length: int, control_group_length: int):
+    """
+        Function to calculate the effect size using Cohen's D Equation
+    """  
+    
+    # Calculate Cohen's d
+    d = (sample_mean - control_group_mean) / sample_std
+
+    return d
+
+
 # Calculate the Sample T statistic
 def calculate_t_statistic(sample_mean: float, sample_std: float, 
-                                 sample_size: int, population_mean: float) -> float:
+                                sample_size: int, population_mean: float) -> float:
     """
         Function to calculate the t statistic of a sample
     """   
     # Calculate the T-statistic
-    t_stat = (sample_mean - population_mean) / (sample_std / (sample_size ** 0.5))
+    np.seterr(divide='ignore', invalid='ignore')
+    t_stat = (sample_mean - population_mean) / (sample_std / ((float(sample_size) ** 0.5 )))
     
     return t_stat 
 
@@ -138,5 +154,22 @@ def calculate_test_power(effect_size: float, sample_mean: float, population_mean
 
     # Calculate power
     power = power_analysis.solve_power(effect_size=effect_size, nobs=sample_size, alpha=alpha, alternative='larger')
+    
+    return power
+
+
+from statsmodels.stats.power import TTestPower, TTestIndPower
+# Calculate the test Power
+def calculate_Indtest_power(effect_size: float, sample_mean: float, population_mean: float, 
+                          sample_std: float, sample_size: int, alpha: float = 0.05) ->  float:
+    """
+        Function to calculate power for a test
+    """   
+    # Initialize TTestPower object
+    # power_analysis = TTestPower()
+    power_analysis = TTestIndPower()
+
+    # Calculate power
+    power = power_analysis.power(effect_size=effect_size, nobs1=sample_size, alpha=alpha, alternative='larger')
     
     return power

@@ -10,6 +10,7 @@ data_urls:
 data_paths:
   raw_data: data/raw
   processed_data: data/processed
+  output_data: data/output
   genes: gene_expressions
   brain_regions_genes_ge: brain_regions_genes_geneexpressions
   analysis: data/analysis
