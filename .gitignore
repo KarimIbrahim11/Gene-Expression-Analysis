@@ -11,3 +11,5 @@ src/utils/__pycache__/*
 src/utils/__pycache__/data.cpython-38.pyc
 src/preprocessing/brain_correlation_heatmaps.py
 src/utils/.ipynb_checkpoints
+
+notebooks/CS_03_Effect_VS_Sample_size copy.ipynb

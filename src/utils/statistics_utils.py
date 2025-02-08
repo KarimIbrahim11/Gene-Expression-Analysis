@@ -58,6 +58,29 @@ def calculate_gene_mean_expression_values(df: pd.DataFrame) -> pd.DataFrame:
     # Return the result
     return grouped
 
+# Calculate Gene Mean Expression Values per Brain Region
+def calculate_br_mean_expression_values(df: pd.DataFrame) -> pd.DataFrame:
+    """
+        Get the H0 mean expression value per gene id.
+    """
+    # Add sample_count and mean_expression columns
+    df["sample_count"] = df["gene_expression_values"].apply(len)
+    df["sum_expression"] = df["gene_expression_values"].apply(np.sum)
+
+    # Group by gene_id to calculate total sum and total sample count
+    grouped = df.groupby("brain_region").agg(
+        total_expression=("sum_expression", "sum"),
+        total_sample_count=("sample_count", "sum")
+    )
+
+    # Calculate the weighted mean
+    grouped["weighted_mean"] = grouped["total_expression"] / grouped["total_sample_count"]
+    
+    # Reset the index to make the output clearer
+    grouped = grouped.reset_index()
+
+    # Return the result
+    return grouped
 
 # Calculate the standard deviation for each gene_id without exploding the list
 def calculate_std_gene_id_optimized(df: pd.DataFrame) -> pd.DataFrame:

@@ -22,6 +22,7 @@ pygnuplot = "^0.12.3"
 datashader = "0.15.2"
 statsmodels = "^0.12"
 nilearn = "0.9.2"
+imageio = "^2.31.6"
 
 
 [[tool.poetry.packages]]
