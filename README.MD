@@ -160,13 +160,13 @@ All visualizations can be reproduced from the aforementioned notebooks.
 
 <img src="results/plots/PL_06_8_Power_P-Value_Effect_Size_Animation.gif" width="500" loop>
 
-#### Effect Size of Different Brain Regions across Different Sample Sizes:
+#### Average Effect Size of Different Brain Regions across Different Sample Sizes:
 <img src="results/plots/PL_07_1_Brain_Effect_Size_Animation.gif" width="500" loop>
 
-#### P-Values of Different Brain Regions across Different Sample Sizes:
+#### Average P-Values of Different Brain Regions across Different Sample Sizes:
 <img src="results/plots/PL_08_1_Brain_PValue_Animation.gif" width="500" loop>
 
-#### Weighted Averaged of Brain Regions KDE: 
+#### Weighted Averaged of Brain Regions Gene Expression Values KDE: 
 ![KDE](results/plots/PL_02_1_KDE_Brain_Regions_Weighted_Mean.png)
 
 #### TSNE Visualization of Clusters:

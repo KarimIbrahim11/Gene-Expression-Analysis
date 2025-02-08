@@ -15,8 +15,8 @@ data_paths:
   brain_regions_genes_ge: brain_regions_genes_geneexpressions
   analysis: data/analysis
 output_paths:
-  stats: stats
-  plots: plots
+  stats: results/stats
+  plots: results/plots
 
 # Ids of donor for ease of access
 donors_ids:
