@@ -26,7 +26,7 @@ parser = PathConfigParser(str(data_config_file))
 parser.load()
 
 # Path of Plots 
-PLOTS_PTH = project_root / parser.get("data_paths", {}).get("plots")
+PLOTS_PTH = project_root / parser.get("output_paths", {}).get("plots")
 PLOTS_PTH.mkdir(parents=True, exist_ok=True)
 
 
